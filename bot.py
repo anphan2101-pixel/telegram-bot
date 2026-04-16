@@ -17,7 +17,8 @@ user_mode = {}
 
 keyboard = ReplyKeyboardMarkup(
     keyboard=[
-        [KeyboardButton(text="🇨🇳 → 🇻🇳"), KeyboardButton(text="🇻🇳 → 🇨🇳")]
+        [KeyboardButton(text="🇨🇳 → 🇻🇳"), KeyboardButton(text="🇻🇳 → 🇨🇳")],
+        [KeyboardButton(text="🇻🇳 → 🇬🇧 (QA)")],
     ],
     resize_keyboard=True
 )
@@ -29,12 +30,14 @@ async def start(message: Message):
     await message.answer("Chọn chế độ dịch 👇", reply_markup=keyboard)
 
 # ===== CHANGE MODE =====
-@dp.message(lambda message: message.text in ["🇨🇳 → 🇻🇳", "🇻🇳 → 🇨🇳"])
+@dp.message(lambda message: message.text in ["🇨🇳 → 🇻🇳", "🇻🇳 → 🇨🇳", "🇻🇳 → 🇬🇧 (QA)"])
 async def change_mode(message: Message):
     if message.text == "🇨🇳 → 🇻🇳":
         user_mode[message.from_user.id] = "CN_VI"
-    else:
+    elif message.text == "🇻🇳 → 🇨🇳":
         user_mode[message.from_user.id] = "VI_CN"
+    else:
+        user_mode[message.from_user.id] = "VI_EN_QA"
 
     await message.answer(f"Đã chuyển mode: {message.text}")
 
@@ -45,12 +48,24 @@ async def translate_text(message: Message):
         text = message.text
         mode = user_mode.get(message.from_user.id, "CN_VI")
 
+        # CN -> VI
         if mode == "CN_VI":
             result = GoogleTranslator(source='zh-CN', target='vi').translate(text)
             title = "🇨🇳 → 🇻🇳"
-        else:
+
+        # VI -> CN
+        elif mode == "VI_CN":
             result = GoogleTranslator(source='vi', target='zh-CN').translate(text)
             title = "🇻🇳 → 🇨🇳"
+
+        # VI -> EN (QA)
+        else:
+            # dịch thường trước
+            raw = GoogleTranslator(source='vi', target='en').translate(text)
+
+            # tối ưu lại theo ngữ cảnh testing
+            result = f"(QA Context)\n{raw}"
+            title = "🇻🇳 → 🇬🇧 (QA)"
 
         await message.answer(
             f"✨ {title}\n\n"
