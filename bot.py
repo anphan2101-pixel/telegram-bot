@@ -6,7 +6,7 @@ from aiogram.filters import Command
 from deep_translator import GoogleTranslator
 
 # ===== CONFIG =====
-BOT_TOKEN = os.getenv("8680535248:AAHimCrwwr6_7exbtMFP8q8K6NhbXD_iqZ4")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 # ===== INIT =====
 bot = Bot(token=BOT_TOKEN)
